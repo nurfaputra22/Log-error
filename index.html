@@ -89,19 +89,36 @@
           filtered.forEach((d) => {
             const tr = document.createElement("tr");
             tr.className = "hover:bg-gray-100 transition";
-            tr.innerHTML = `
-              <td class="py-2 px-3 border break-words">${d["Tanggal"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Kendala"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Platform"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Nama"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Plant"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Posisi"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Status"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Catatan Penyelesaian Masalah"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Trustmedis Help"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Lampiran Masalah"] || ""}</td>
-              <td class="py-2 px-3 border break-words">${d["Lampiran Penyelesaian"] || ""}</td>
-            `;
+  // Update Link
+function makeLink(text) {
+  if (!text) return "";
+  // Jika ada lebih dari satu link dipisahkan koma
+  return text
+    .split(",")
+    .map(t => t.trim())
+    .map(t => {
+      if (t.startsWith("http")) {
+        return `<a href="${t}" target="_blank" class="text-blue-600 underline hover:text-blue-800">${t}</a>`;
+      }
+      return t;
+    })
+    .join("<br>");
+}
+
+tr.innerHTML = `
+  <td class="py-2 px-3 border break-words">${d["Tanggal"] || ""}</td>
+  <td class="py-2 px-3 border break-words">${d["Kendala"] || ""}</td>
+  <td class="py-2 px-3 border break-words">${d["Platform"] || ""}</td>
+  <td class="py-2 px-3 border break-words">${d["Nama"] || ""}</td>
+  <td class="py-2 px-3 border break-words">${d["Plant"] || ""}</td>
+  <td class="py-2 px-3 border break-words">${d["Posisi"] || ""}</td>
+  <td class="py-2 px-3 border break-words">${d["Status"] || ""}</td>
+  <td class="py-2 px-3 border break-words">${d["Catatan Penyelesaian Masalah"] || ""}</td>
+  <td class="py-2 px-3 border break-words">${d["Trustmedis Help"] || ""}</td>
+  <td class="py-2 px-3 border break-words">${makeLink(d["Lampiran Masalah"])}</td>
+  <td class="py-2 px-3 border break-words">${makeLink(d["Lampiran Penyelesaian"])}</td>
+`;
+
             dataTable.appendChild(tr);
           });
         }
@@ -123,6 +140,7 @@
   </script>
 </body>
 </html>
+
 
 
 
