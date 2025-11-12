@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log Error Virtu Digilab All Branch</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tambahkan PapaParse -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-7xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6">📋 Log Error Berdasarkan Plant</h1>
+
+    <!-- Filter Dropdown -->
+    <div class="mb-4">
+      <label for="plantFilter" class="block font-semibold mb-2">Pilih Plant:</label>
+      <select id="plantFilter" class="p-2 border rounded w-64">
+        <option value="">Semua Plant</option>
+      </select>
+    </div>
+
+    <!-- Tabel Data -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+      <table class="min-w-full border-collapse">
+        <thead class="bg-blue-600 text-white">
+          <tr>
+            <th class="py-2 px-4 text-left w-[120px]">Tanggal</th>
+            <th class="py-2 px-4 text-left w-[120px]">Kendala</th>
+            <th class="py-2 px-4 text-left w-[120px]">Platform</th>
+            <th class="py-2 px-4 text-left w-[120px]">Nama</th>
+            <th class="py-2 px-4 text-left w-[120px]">Plant</th>
+            <th class="py-2 px-4 text-left w-[120px]">Posisi</th>
+            <th class="py-2 px-4 text-left w-[120px]">Status</th>
+            <th class="py-2 px-4 text-left w-[120px]">Catatan Penyelesaian Masalah</th>
+            <th class="py-2 px-4 text-left w-[120px]">Trustmedis Help</th>
+            <th class="py-2 px-4 text-left w-[120px]">Lampiran Masalah</th>
+            <th class="py-2 px-4 text-left w-[120px]">Lampiran Penyelesaian</th>
+          </tr>
+        </thead>
+        <tbody id="dataTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTJ_8BlTuwDxt0sVWSkL8HJpb6ehiXqY8jC4TIVW_MYOGxv50akPI_W1W7NMC3YTYjEQhvIqbMU2GtM/pub?output=csv";
+
+    const dataTable = document.getElementById("dataTable");
+    const plantFilter = document.getElementById("plantFilter");
+
+    async function loadData() {
+      try {
+        const res = await fetch(sheetUrl);
+        const csvText = await res.text();
+
+        // Parse CSV dengan PapaParse
+        const parsed = Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true
+        });
+
+        const data = parsed.data;
+
+        // Isi dropdown plant
+        const plants = [...new Set(data.map(d => d["Plant"]).filter(Boolean))];
+        plants.forEach(p => {
+          const opt = document.createElement("option");
+          opt.value = p;
+          opt.textContent = p;
+          plantFilter.appendChild(opt);
+        });
+
+        // Render tabel
+        function renderTable(filterPlant = "") {
+          dataTable.innerHTML = "";
+          const filtered = data.filter(d => !filterPlant || d["Plant"] === filterPlant);
+
+          if (filtered.length === 0) {
+            dataTable.innerHTML = `
+              <tr><td colspan="11" class="py-4 text-center text-gray-500">Tidak ada data untuk filter ini</td></tr>
+            `;
+            return;
+          }
+
+          filtered.forEach(d => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td class="py-2 px-4 border">${d["Tanggal"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Kendala"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Platform"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Nama"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Plant"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Posisi"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Status"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Catatan Penyelesaian Masalah"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Trustmedis Help"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Lampiran Masalah"] || ""}</td>
+              <td class="py-2 px-4 border">${d["Lampiran Penyelesaian"] || ""}</td>
+            `;
+            dataTable.appendChild(tr);
+          });
+        }
+
+        // Event listener untuk filter plant
+        plantFilter.addEventListener("change", e => {
+          renderTable(e.target.value);
+        });
+
+        // Render pertama kali
+        renderTable();
+
+      } catch (err) {
+        console.error("Gagal memuat data:", err);
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
